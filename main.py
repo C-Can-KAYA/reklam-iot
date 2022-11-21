@@ -6,7 +6,7 @@ from moviepy.editor import VideoFileClip
 import json
 
 def kayit():
-    url = "http://localhost:8080/minibus/findByNumberPlate/34BKC789"
+    url = "https://reklamcilik.herokuapp.com/minibus/findByNumberPlate/5"
     osDosyasi = os.listdir()
     data_json = json.loads(urlopen(url).read())
     dosyaAdi = []
