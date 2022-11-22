@@ -16,7 +16,7 @@ def kayit():
             urllib.request.urlretrieve(x["reklamLink"], x["reklamId"] + '.mp4')
 
     for a in range(len(osDosyasi)):
-        if not (osDosyasi[a] == "main.py" or osDosyasi[a] == ".idea" or osDosyasi[a] == "venv"):
+        if (osDosyasi[a].find('.mp4') >= 0):
             try:
                 if not (dosyaAdi[a] in osDosyasi):
                     os.remove(osDosyasi[a])
@@ -28,29 +28,30 @@ def get_length(filename):
     return clip.duration
 a = 1
 while a == 1:
-    duration = 0.0
     osDosyasi = kayit()
     if osDosyasi is not None:
         for c in range(len(osDosyasi)):
             if not (osDosyasi[c] == "main.py"):
                 videoName = osDosyasi[c]
-                video = cv2.VideoCapture(videoName)
+                video = cv2.VideoCapture(videoName,cv2.CAP_V4L)
                 if video.isOpened():
                     print('Video başarılı bir şekilde açıldı')
                 else:
                     print('Bir sorunla karşılaşıldı')
                 windowName = 'Video Reproducer'
-                cv2.namedWindow(windowName, cv2.WINDOW_NORMAL)
+                
                 while True:
+                    cv2.namedWindow(windowName, cv2.WND_PROP_FULLSCREEN)
                     ret,frame = video.read() 
                     if not ret: 
                          print("frame okunamıyor")   
                          cv2.destroyWindow(windowName)
                          break
-                    reescaled_frame  = frame
-                    cv2.setWindowProperty(windowName, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-                    cv2.imshow(windowName, reescaled_frame )
-                    waitKey = (cv2.waitKey(13) & 0xFF)
+                    rescaled_frame  = frame
+                    cv2.setWindowProperty(windowName, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_AUTOSIZE)
+                    cv2.resizeWindow(windowName, 3840,2160)
+                    cv2.imshow(windowName, rescaled_frame )
+                    waitKey = (cv2.waitKey(1) & 0xFF)
                     if  waitKey == ord('q'):
                          print("video kapatıldı.")
                          cv2.destroyWindow(windowName)
