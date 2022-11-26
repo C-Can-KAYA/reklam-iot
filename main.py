@@ -2,38 +2,43 @@ import cv2
 from urllib.request import urlopen
 import os
 import urllib.request
-from moviepy.editor import VideoFileClip
 import json
-
+import datetime
+def sizeDosya():
+    sayac=0
+    dosyalar = os.listdir()
+    for a in range(len(dosyalar)):
+        if (dosyalar[a].find('.mp4') >= 0):
+            sayac=sayac+1
+    return sayac
+            
 def kayit():
-    url = "https://reklamcilik.herokuapp.com/minibus/findByNumberPlate/5"
     osDosyasi = os.listdir()
-    data_json = json.loads(urlopen(url).read())
-    dosyaAdi = []
-    for x in data_json:
-        dosyaAdi.append(x["reklamId"] + '.mp4')
-        if not (x["reklamId"] + '.mp4' in osDosyasi):
-            urllib.request.urlretrieve(x["reklamLink"], x["reklamId"] + '.mp4')
-
-    for a in range(len(osDosyasi)):
-        if (osDosyasi[a].find('.mp4') >= 0):
-            try:
-                if not (dosyaAdi[a] in osDosyasi):
+    now = datetime.datetime.now().time()
+    if (sizeDosya()<=0 or (now.hour == 12 and now.minute==25)):
+        url = "https://reklamcilik.herokuapp.com/minibus/findByNumberPlate/5"
+        data_json = json.loads(urlopen(url).read())
+        dosyaAdi = []
+        for x in data_json:
+            dosyaAdi.append(x["reklamId"] + '.mp4')
+            if not (x["reklamId"] + '.mp4' in osDosyasi):
+                urllib.request.urlretrieve(x["reklamLink"], x["reklamId"] + '.mp4')
+        for a in range(len(osDosyasi)):
+            if (osDosyasi[a].find('.mp4') >= 0):
+                try:
+                    if not (dosyaAdi[a] in osDosyasi):
+                        os.remove(osDosyasi[a])
+                except IndexError:
                     os.remove(osDosyasi[a])
-            except IndexError:
-                os.remove(osDosyasi[a])
     return osDosyasi
-def get_length(filename):
-    clip = VideoFileClip(filename)
-    return clip.duration
-a = 1
-while a == 1:
+
+while True:   
     osDosyasi = kayit()
     if osDosyasi is not None:
         for c in range(len(osDosyasi)):
-            if not (osDosyasi[c] == "main.py"):
+            if (osDosyasi[c].find('.mp4') >= 0):
                 videoName = osDosyasi[c]
-                video = cv2.VideoCapture(videoName,cv2.CAP_V4L)
+                video = cv2.VideoCapture(videoName)
                 if video.isOpened():
                     print('Video başarılı bir şekilde açıldı')
                 else:
