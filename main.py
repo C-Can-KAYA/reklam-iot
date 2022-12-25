@@ -2,8 +2,8 @@ import cv2
 from urllib.request import urlopen
 import os
 import urllib.request
+import requests
 import json
-import datetime
 def sizeDosya():
     sayac=0
     dosyalar = os.listdir()
@@ -14,10 +14,11 @@ def sizeDosya():
             
 def kayit():
     osDosyasi = os.listdir()
-    now = datetime.datetime.now().time()
-    if (sizeDosya()<=0 or (now.hour == 12 and now.minute==25)):
-        url = "https://reklamcilik.herokuapp.com/minibus/findByNumberPlate/5"
-        data_json = json.loads(urlopen(url).read())
+    url = "http://localhost:8080/minibus/findByNumberPlate/1"
+    data_json = json.loads(urlopen(url).read())
+    kontrol = data_json[0]
+    if (sizeDosya()<=0 or kontrol['checked']==True):
+        kontrolVideo=0
         dosyaAdi = []
         for x in data_json:
             dosyaAdi.append(x["reklamId"] + '.mp4')
@@ -29,7 +30,16 @@ def kayit():
                     if not (dosyaAdi[a] in osDosyasi):
                         os.remove(osDosyasi[a])
                 except IndexError:
-                    os.remove(osDosyasi[a])
+                    try:
+                        fileLocation=os.getcwd()
+                        fileLocation=fileLocation.replace("\\", "/")
+                        os.chmod(fileLocation, 0o777)
+                        os.remove(osDosyasi[a])
+                    except PermissionError:
+                        kontrolVideo=1
+        if(kontrolVideo==0):
+            data = {'checked':'false','plaka': '1'}
+            requests.post("http://localhost:8080/minibus/guncel", json=data)
     return osDosyasi
 
 while True:   
