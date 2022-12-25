@@ -14,32 +14,35 @@ def sizeDosya():
             
 def kayit():
     osDosyasi = os.listdir()
-    url = "http://localhost:8080/minibus/findByNumberPlate/1"
-    data_json = json.loads(urlopen(url).read())
-    kontrol = data_json[0]
-    if (sizeDosya()<=0 or kontrol['checked']==True):
-        kontrolVideo=0
-        dosyaAdi = []
-        for x in data_json:
-            dosyaAdi.append(x["reklamId"] + '.mp4')
-            if not (x["reklamId"] + '.mp4' in osDosyasi):
-                urllib.request.urlretrieve(x["reklamLink"], x["reklamId"] + '.mp4')
-        for a in range(len(osDosyasi)):
-            if (osDosyasi[a].find('.mp4') >= 0):
-                try:
-                    if not (dosyaAdi[a] in osDosyasi):
-                        os.remove(osDosyasi[a])
-                except IndexError:
+    try:
+        url = "http://localhost:8080/minibus/findByNumberPlate/1"
+        data_json = json.loads(urlopen(url).read())
+        kontrol = data_json[0]
+        if (sizeDosya()<=0 or kontrol['checked']==True):
+            kontrolVideo=0
+            dosyaAdi = []
+            for x in data_json:
+                dosyaAdi.append(x["reklamId"] + '.mp4')
+                if not (x["reklamId"] + '.mp4' in osDosyasi):
+                    urllib.request.urlretrieve(x["reklamLink"], x["reklamId"] + '.mp4')
+            for a in range(len(osDosyasi)):
+                if (osDosyasi[a].find('.mp4') >= 0):
                     try:
-                        fileLocation=os.getcwd()
-                        fileLocation=fileLocation.replace("\\", "/")
-                        os.chmod(fileLocation, 0o777)
-                        os.remove(osDosyasi[a])
-                    except PermissionError:
-                        kontrolVideo=1
-        if(kontrolVideo==0):
-            data = {'checked':'false','plaka': '1'}
-            requests.post("http://localhost:8080/minibus/guncel", json=data)
+                        if not (dosyaAdi[a] in osDosyasi):
+                            os.remove(osDosyasi[a])
+                    except IndexError:
+                        try:
+                            fileLocation=os.getcwd()
+                            fileLocation=fileLocation.replace("\\", "/")
+                            os.chmod(fileLocation, 0o777)
+                            os.remove(osDosyasi[a])
+                        except PermissionError:
+                            kontrolVideo=1
+            if(kontrolVideo==0):
+                data = {'checked':'false','plaka': '1'}
+                requests.post("http://localhost:8080/minibus/guncel", json=data)
+    except Exception:
+        return osDosyasi
     return osDosyasi
 
 while True:   
